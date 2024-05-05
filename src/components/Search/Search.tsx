@@ -1,7 +1,5 @@
-import { useState } from "react";
-
-export default function Search() {
-  const [query, setQuery] = useState("");
+export default function Search(props:{query:string,setQuery:(value:string)=>void}) {
+  const {query,setQuery} = props;
   return (
     <>
       <input

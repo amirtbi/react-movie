@@ -3,7 +3,7 @@ export default function Logo() {
     <>
       <div className="logo">
         <span role="img">🍿</span>
-        <h1>useReactHooks</h1>
+        <h1>usePopCorn</h1>
       </div>
     </>
   );

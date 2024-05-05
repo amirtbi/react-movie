@@ -35,33 +35,51 @@ export default function App() {
   const [watched, setWatchedMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setErrorMessage] = useState("");
-  const query = "inter1ception";
+  const [query,setQuery] = useState("inception")
 
+
+
+
+  // useEffect(()=>{
+  //     console.log("A")
+  // })
+  // useEffect(()=>{
+  //   console.log("B")
+  // },[]);
+
+  // console.log("C")
   useEffect(() => {
     const fetchMovieData = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?S=${query}&apikey=${KEY}`
-        );
-        const data = await res.json();
-        if ("Response" in data && data.Response === "False") {
-          throw new Error("movie name is not correct");
-        }
-        setMovies(data.Search);
+        setErrorMessage("")
+          const res = await fetch(
+            `http://www.omdbapi.com/?S=${query}&apikey=${KEY}`
+          );
+          const data = await res.json();
+          if ("Response" in data && data.Response === "False") {
+            throw new Error("movie name is not correct");
+          }
+          setMovies(data.Search);
       } catch (err: unknown) {
         const resError = (err as { message: string }).message;
         setErrorMessage(resError);
       } finally {
         setIsLoading(false);
+       
       }
     };
+    if(query.length < 3){
+      setMovies([]);
+      setErrorMessage("");
+      return;
+    }
     fetchMovieData();
-  }, []);
+  }, [query]);
   const renderToggleBox = () => {
     return (
       <>
-        {isLoading && !error ? (
+        {!movies.length ? <p className="error">Not found any movies</p> :isLoading && !error ? (
           <Loader />
         ) : !isLoading && !error ? (
           <FilteredMovies data={movies} />
@@ -76,8 +94,8 @@ export default function App() {
       <Test />
       <Header>
         <Logo />
-        <Search />
-        <FoundResult movies={movies} />
+        <Search query={query} setQuery={setQuery} />
+        <FoundResult movies={movies}  />
       </Header>
       <Main>
         <ToggleBox>{renderToggleBox()}</ToggleBox>
