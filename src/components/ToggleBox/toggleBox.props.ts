@@ -1,3 +1,3 @@
 export interface OutputProps {
-  children?: React.ReactElement[];
+  children?:React.ReactElement[] | Element
 }
