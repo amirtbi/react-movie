@@ -1,7 +1,7 @@
 export default function Loader() {
   return (
     <>
-      <p className="loader">Loading...</p>
+      <p className="loader">loag...</p>
     </>
   );
 }
