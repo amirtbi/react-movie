@@ -10,6 +10,7 @@ import WatchedMovies from "./components/WatchedMovies/WatchedMovies";
 import StarRating from "./components/StartRating/StartRating";
 import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/Error/Error";
+import MovieDetails from "./components/MovieDetails/MovieDetails";
 
 const KEY = "923b616d";
 
@@ -35,19 +36,9 @@ export default function App() {
   const [watched, setWatchedMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setErrorMessage] = useState("");
-  const [query,setQuery] = useState("inception")
+  const [query,setQuery] = useState("inception");
+  const [selectedId,setSelectedId] = useState<string | null>(null);
 
-
-
-
-  // useEffect(()=>{
-  //     console.log("A")
-  // })
-  // useEffect(()=>{
-  //   console.log("B")
-  // },[]);
-
-  // console.log("C")
   useEffect(() => {
     const fetchMovieData = async () => {
       try {
@@ -82,7 +73,7 @@ export default function App() {
         {!movies.length ? <p className="error">Not found any movies</p> :isLoading && !error ? (
           <Loader />
         ) : !isLoading && !error ? (
-          <FilteredMovies data={movies} />
+          <FilteredMovies data={movies}  onSetSelectedId={setSelectedId} />
         ) : error ? (
           <ErrorMessage error={error} />
         ) : null}
@@ -95,12 +86,15 @@ export default function App() {
       <Header>
         <Logo />
         <Search query={query} setQuery={setQuery} />
-        <FoundResult movies={movies}  />
+        <FoundResult movies={movies} />
       </Header>
       <Main>
         <ToggleBox>{renderToggleBox()}</ToggleBox>
         <ToggleBox>
-          <WatchedMovies data={watched} />
+          {selectedId ? <MovieDetails selectedId={selectedId}/> : <>
+             <WatchedMovies data={watched} />
+          </>
+          }
         </ToggleBox>
       </Main>
     </>
