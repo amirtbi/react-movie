@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./components/Header/Header";
 import Main from "./components/Main/Main";
 import Logo from "./components/Logo/Logo";
@@ -8,53 +8,10 @@ import ToggleBox from "./components/ToggleBox/ToggleBox";
 import FilteredMovies from "./components/FilteredMovies/FilteredMovies";
 import WatchedMovies from "./components/WatchedMovies/WatchedMovies";
 import StarRating from "./components/StartRating/StartRating";
+import Loader from "./components/Loader/Loader";
+import ErrorMessage from "./components/Error/Error";
 
-const tempMovieData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt0133093",
-    Title: "The Matrix",
-    Year: "1999",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-  },
-  {
-    imdbID: "tt6751668",
-    Title: "Parasite",
-    Year: "2019",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-  },
-];
-
-const tempWatchedData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    runtime: 148,
-    imdbRating: 8.8,
-    userRating: 10,
-  },
-  {
-    imdbID: "tt0088763",
-    Title: "Back to the Future",
-    Year: "1985",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-    runtime: 116,
-    imdbRating: 8.5,
-    userRating: 9,
-  },
-];
+const KEY = "923b616d";
 
 function Test() {
   const [movieRating, setMovieRating] = useState(0);
@@ -72,9 +29,48 @@ function Test() {
     </>
   );
 }
+
 export default function App() {
-  const [movies, setTempMovies] = useState(tempMovieData);
-  const [watched, setTempWatchedMovies] = useState(tempWatchedData);
+  const [movies, setMovies] = useState([]);
+  const [watched, setWatchedMovies] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setErrorMessage] = useState("");
+  const query = "inter1ception";
+
+  useEffect(() => {
+    const fetchMovieData = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?S=${query}&apikey=${KEY}`
+        );
+        const data = await res.json();
+        if ("Response" in data && data.Response === "False") {
+          throw new Error("movie name is not correct");
+        }
+        setMovies(data.Search);
+      } catch (err: unknown) {
+        const resError = (err as { message: string }).message;
+        setErrorMessage(resError);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchMovieData();
+  }, []);
+  const renderToggleBox = () => {
+    return (
+      <>
+        {isLoading && !error ? (
+          <Loader />
+        ) : !isLoading && !error ? (
+          <FilteredMovies data={movies} />
+        ) : error ? (
+          <ErrorMessage error={error} />
+        ) : null}
+      </>
+    );
+  };
   return (
     <>
       <Test />
@@ -84,9 +80,7 @@ export default function App() {
         <FoundResult movies={movies} />
       </Header>
       <Main>
-        <ToggleBox>
-          <FilteredMovies data={movies} />
-        </ToggleBox>
+        <ToggleBox>{renderToggleBox()}</ToggleBox>
         <ToggleBox>
           <WatchedMovies data={watched} />
         </ToggleBox>
