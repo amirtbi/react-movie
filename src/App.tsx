@@ -10,7 +10,7 @@ import WatchedMovies from "./components/WatchedMovies/WatchedMovies";
 import StarRating from "./components/StartRating/StartRating";
 import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/Error/Error";
-import MovieDetails from "./components/MovieDetails/MovieDetails";
+import MovieDetail from "./MovieDetail/MovieDetail";
 
 const KEY = "923b616d";
 
@@ -36,44 +36,49 @@ export default function App() {
   const [watched, setWatchedMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setErrorMessage] = useState("");
-  const [query,setQuery] = useState("inception");
-  const [selectedId,setSelectedId] = useState<string | null>(null);
+  const [query, setQuery] = useState("inception");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchMovieData = async () => {
       try {
         setIsLoading(true);
-        setErrorMessage("")
-          const res = await fetch(
-            `http://www.omdbapi.com/?S=${query}&apikey=${KEY}`
-          );
-          const data = await res.json();
-          if ("Response" in data && data.Response === "False") {
-            throw new Error("movie name is not correct");
-          }
-          setMovies(data.Search);
+        setErrorMessage("");
+        const res = await fetch(
+          `http://www.omdbapi.com/?S=${query}&apikey=${KEY}`
+        );
+        const data = await res.json();
+        if ("Response" in data && data.Response === "False") {
+          throw new Error("movie name is not correct");
+        }
+        setMovies(data.Search);
       } catch (err: unknown) {
         const resError = (err as { message: string }).message;
         setErrorMessage(resError);
       } finally {
         setIsLoading(false);
-       
       }
     };
-    if(query.length < 3){
+    if (query.length < 3) {
       setMovies([]);
       setErrorMessage("");
       return;
     }
     fetchMovieData();
   }, [query]);
+
+  const handleSelectMovie = (id: string) => {
+    setSelectedId((selectdId) => (selectdId === id ? null : id));
+  };
   const renderToggleBox = () => {
     return (
       <>
-        {!movies.length ? <p className="error">Not found any movies</p> :isLoading && !error ? (
+        {!movies.length ? (
+          <p className="error">Not found any movies</p>
+        ) : isLoading && !error ? (
           <Loader />
         ) : !isLoading && !error ? (
-          <FilteredMovies data={movies}  onSetSelectedId={setSelectedId} />
+          <FilteredMovies data={movies} onSetSelectedId={handleSelectMovie} />
         ) : error ? (
           <ErrorMessage error={error} />
         ) : null}
@@ -91,10 +96,17 @@ export default function App() {
       <Main>
         <ToggleBox>{renderToggleBox()}</ToggleBox>
         <ToggleBox>
-          {selectedId ? <MovieDetails selectedId={selectedId}/> : <>
-             <WatchedMovies data={watched} />
-          </>
-          }
+          {selectedId ? (
+            <MovieDetail
+              selectedId={selectedId}
+              onCloseMovieDetail={() => setSelectedId(null)}
+              apiKey={KEY}
+            />
+          ) : (
+            <>
+              <WatchedMovies data={watched} />
+            </>
+          )}
         </ToggleBox>
       </Main>
     </>

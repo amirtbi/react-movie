@@ -71,8 +71,8 @@ export default function StarRating(props: {
   maxRating?: number;
   size?: number;
   color?: string;
-  messages: string[];
-  defaultRating: number;
+  messages?: string[];
+  defaultRating?: number;
   onSetMovieRating?: (value: number) => void;
 }) {
   const {
