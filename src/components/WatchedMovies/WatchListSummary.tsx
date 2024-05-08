@@ -8,7 +8,9 @@ export default function WatchListSummary(props: {
 
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
-  const avgRuntime = average(watched.map((movie) => movie.runtime));
+  const avgRuntime = average(
+    watched.map((movie) => (movie.runtime ? movie.runtime : 0))
+  );
   return (
     <>
       <div className="summary">
@@ -16,19 +18,19 @@ export default function WatchListSummary(props: {
         <div>
           <p>
             <span>#️⃣</span>
-            <span>10 movies</span>
+            <span>{watched.length} movies</span>
           </p>
           <p>
             <span>⭐️</span>
-            <span>{avgImdbRating}</span>
+            <span>{avgImdbRating.toFixed(2)}</span>
           </p>
           <p>
             <span>🌟</span>
-            <span>{avgUserRating}</span>
+            <span>{avgUserRating.toFixed(2)}</span>
           </p>
           <p>
             <span>⏳</span>
-            <span>{avgRuntime} min</span>
+            <span>{avgRuntime.toFixed(2)} min</span>
           </p>
         </div>
       </div>

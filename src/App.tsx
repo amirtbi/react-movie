@@ -7,33 +7,15 @@ import FoundResult from "./components/FoundResult/FoundResult";
 import ToggleBox from "./components/ToggleBox/ToggleBox";
 import FilteredMovies from "./components/FilteredMovies/FilteredMovies";
 import WatchedMovies from "./components/WatchedMovies/WatchedMovies";
-import StarRating from "./components/StartRating/StartRating";
 import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/Error/Error";
 import MovieDetail from "./MovieDetail/MovieDetail";
+import { WatchMoviesProps } from "./components/WatchedMovies/watchedmovies.props";
 
 const KEY = "923b616d";
-
-function Test() {
-  const [movieRating, setMovieRating] = useState(0);
-  return (
-    <>
-      <StarRating
-        onSetMovieRating={setMovieRating}
-        defaultRating={3}
-        maxRating={4}
-        color="yellow"
-        size={12}
-        messages={["Terrible", "Bad", "Okay", "Good"]}
-      />
-      <p>You scored the movie {movieRating} value</p>
-    </>
-  );
-}
-
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [watched, setWatchedMovies] = useState([]);
+  const [watched, setWatchedMovies] = useState<WatchMoviesProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setErrorMessage] = useState("");
   const [query, setQuery] = useState("inception");
@@ -70,6 +52,22 @@ export default function App() {
   const handleSelectMovie = (id: string) => {
     setSelectedId((selectdId) => (selectdId === id ? null : id));
   };
+  const handleWatchedMovie = (movie: WatchMoviesProps) => {
+    const movieHasExisted = watched.find(
+      (item) => item.imbdId === movie.imbdId
+    );
+    if (movieHasExisted) {
+      return;
+    }
+    console.log("movie", movie);
+    setWatchedMovies((watched) => [...watched, movie]);
+  };
+
+  const deleteMovie = (id: string) => {
+    setWatchedMovies((watched) =>
+      watched.filter((movie) => movie.imbdId !== id)
+    );
+  };
   const renderToggleBox = () => {
     return (
       <>
@@ -87,7 +85,6 @@ export default function App() {
   };
   return (
     <>
-      <Test />
       <Header>
         <Logo />
         <Search query={query} setQuery={setQuery} />
@@ -100,11 +97,13 @@ export default function App() {
             <MovieDetail
               selectedId={selectedId}
               onCloseMovieDetail={() => setSelectedId(null)}
+              onAddWatchedMovie={handleWatchedMovie}
+              watched={watched}
               apiKey={KEY}
             />
           ) : (
             <>
-              <WatchedMovies data={watched} />
+              <WatchedMovies data={watched} onDeleteMovie={deleteMovie} />
             </>
           )}
         </ToggleBox>

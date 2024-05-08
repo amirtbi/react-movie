@@ -1,11 +1,14 @@
 import { WatchMoviesProps } from "./watchedmovies.props";
-export default function WatchedMovieItem(props: { movie: WatchMoviesProps }) {
-  const { movie } = props;
+export default function WatchedMovieItem(props: {
+  movie: WatchMoviesProps;
+  onDeleteMovie: (id: string) => void;
+}) {
+  const { movie, onDeleteMovie } = props;
   return (
     <>
-      <li key={movie.imdbID}>
-        <img src={movie.Poster} alt={`${movie.Title} poster`} />
-        <h3>{movie.Title}</h3>
+      <li key={movie.imbdId}>
+        <img src={movie.poster} alt={`${movie.title} poster`} />
+        <h3>{movie.title}</h3>
         <div>
           <p>
             <span>⭐️</span>
@@ -19,6 +22,12 @@ export default function WatchedMovieItem(props: { movie: WatchMoviesProps }) {
             <span>⏳</span>
             <span>{movie.runtime} min</span>
           </p>
+          <button
+            className="btn-delete"
+            onClick={() => onDeleteMovie(movie.imbdId)}
+          >
+            X
+          </button>
         </div>
       </li>
     </>
