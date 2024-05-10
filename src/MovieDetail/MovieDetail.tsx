@@ -41,6 +41,34 @@ export default function MovieDetail(props: {
     fetchMovieDetail();
   }, [selectedId]);
 
+  useEffect(
+    function () {
+      const callBack = (e: KeyboardEvent) => {
+        if (e.code == "Escape") {
+          onCloseMovieDetail();
+          console.log("closing");
+        }
+      };
+      document.addEventListener("keydown", callBack);
+      return function () {
+        document.removeEventListener("keydown", callBack);
+      };
+    },
+    [onCloseMovieDetail]
+  );
+
+  useEffect(
+    function () {
+      if (!title) return;
+      document.title = `Movie | ${title}`;
+      return function () {
+        document.title = "usePopcorn";
+        console.log(`Clean up rendering the ${title}`);
+      };
+    },
+
+    [title]
+  );
   const isWatched = watched.length
     ? watched.map((watch) => watch.imbdId).includes(selectedId)
     : false;

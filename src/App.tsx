@@ -18,25 +18,31 @@ export default function App() {
   const [watched, setWatchedMovies] = useState<WatchMoviesProps[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setErrorMessage] = useState("");
-  const [query, setQuery] = useState("inception");
+  const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchMovieData = async () => {
       try {
         setIsLoading(true);
         setErrorMessage("");
         const res = await fetch(
-          `http://www.omdbapi.com/?S=${query}&apikey=${KEY}`
+          `http://www.omdbapi.com/?S=${query}&apikey=${KEY}`,
+          { signal: controller.signal }
         );
         const data = await res.json();
         if ("Response" in data && data.Response === "False") {
           throw new Error("movie name is not correct");
         }
         setMovies(data.Search);
+        setErrorMessage("");
       } catch (err: unknown) {
-        const resError = (err as { message: string }).message;
-        setErrorMessage(resError);
+        const errorInstance = err as { message: string; name: string };
+        const resError = errorInstance.message;
+        if (errorInstance.name !== "AbortError") {
+          setErrorMessage(resError);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -47,6 +53,9 @@ export default function App() {
       return;
     }
     fetchMovieData();
+    return function () {
+      controller.abort();
+    };
   }, [query]);
 
   const handleSelectMovie = (id: string) => {
