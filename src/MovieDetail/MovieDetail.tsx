@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Loader from "../components/Loader/Loader";
 import StarRating from "../components/StartRating/StartRating";
 import { WatchMoviesProps } from "../components/WatchedMovies/watchedmovies.props";
@@ -14,6 +14,10 @@ export default function MovieDetail(props: {
   const [movie, setMovie] = useState<{ [key: string]: string }>({});
   const [rating, setRating] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
+  console.log("Rendering");
+  const counterRef = useRef(0);
+  // const [counterRef, setCounterRef] = useState(0);
+
   const {
     Title: title,
     Year: year,
@@ -27,6 +31,11 @@ export default function MovieDetail(props: {
     imdbRating,
     Released: released,
   } = movie;
+
+  useEffect(() => {
+    if (rating) counterRef.current += 1;
+    // if (rating) setCounterRef((prevValue) => prevValue + 1);
+  }, [rating]);
   useEffect(() => {
     const fetchMovieDetail = async () => {
       setIsLoading(true);
@@ -82,6 +91,7 @@ export default function MovieDetail(props: {
       runtime: Number((runtime.split(" ") as Array<string>).at(0)),
       imdbRating: Number(imdbRating),
       userRating: rating,
+      counter: counterRef,
     };
     onAddWatchedMovie(userChoice);
     onCloseMovieDetail();

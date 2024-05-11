@@ -15,7 +15,13 @@ import { WatchMoviesProps } from "./components/WatchedMovies/watchedmovies.props
 const KEY = "923b616d";
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [watched, setWatchedMovies] = useState<WatchMoviesProps[]>([]);
+  // const [watched, setWatchedMovies] = useState<WatchMoviesProps[]>([]);
+  const [watched, setWatchedMovies] = useState(function () {
+    const storedValues = JSON.parse(
+      localStorage.getItem("watched") || "{}"
+    ) as WatchMoviesProps[];
+    return storedValues;
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setErrorMessage] = useState("");
   const [query, setQuery] = useState("");
@@ -58,6 +64,9 @@ export default function App() {
     };
   }, [query]);
 
+  useEffect(() => {
+    localStorage.setItem("watched", JSON.stringify(watched));
+  }, [watched]);
   const handleSelectMovie = (id: string) => {
     setSelectedId((selectdId) => (selectdId === id ? null : id));
   };
