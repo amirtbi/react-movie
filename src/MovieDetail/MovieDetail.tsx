@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Loader from "../components/Loader/Loader";
 import StarRating from "../components/StartRating/StartRating";
 import { WatchMoviesProps } from "../components/WatchedMovies/watchedmovies.props";
+import { useKey } from "../components/hooks/useKeyEvent";
 export default function MovieDetail(props: {
   selectedId: string;
   apiKey: string;
@@ -14,10 +15,8 @@ export default function MovieDetail(props: {
   const [movie, setMovie] = useState<{ [key: string]: string }>({});
   const [rating, setRating] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(false);
-  console.log("Rendering");
+  useKey("Escape", onCloseMovieDetail);
   const counterRef = useRef(0);
-  // const [counterRef, setCounterRef] = useState(0);
-
   const {
     Title: title,
     Year: year,
@@ -34,7 +33,6 @@ export default function MovieDetail(props: {
 
   useEffect(() => {
     if (rating) counterRef.current += 1;
-    // if (rating) setCounterRef((prevValue) => prevValue + 1);
   }, [rating]);
   useEffect(() => {
     const fetchMovieDetail = async () => {
@@ -49,22 +47,6 @@ export default function MovieDetail(props: {
 
     fetchMovieDetail();
   }, [selectedId]);
-
-  useEffect(
-    function () {
-      const callBack = (e: KeyboardEvent) => {
-        if (e.code == "Escape") {
-          onCloseMovieDetail();
-          console.log("closing");
-        }
-      };
-      document.addEventListener("keydown", callBack);
-      return function () {
-        document.removeEventListener("keydown", callBack);
-      };
-    },
-    [onCloseMovieDetail]
-  );
 
   useEffect(
     function () {

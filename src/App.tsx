@@ -11,82 +11,39 @@ import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/Error/Error";
 import MovieDetail from "./MovieDetail/MovieDetail";
 import { WatchMoviesProps } from "./components/WatchedMovies/watchedmovies.props";
+import { useMovie } from "./components/hooks/useMovie";
+import { useLocalStorageState } from "./components/hooks/useLocalStorageState";
 
 const KEY = "923b616d";
 export default function App() {
-  const [movies, setMovies] = useState([]);
-  // const [watched, setWatchedMovies] = useState<WatchMoviesProps[]>([]);
-  const [watched, setWatchedMovies] = useState(function () {
-    const storedValues = JSON.parse(
-      localStorage.getItem("watched") || "{}"
-    ) as WatchMoviesProps[];
-    return storedValues;
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setErrorMessage] = useState("");
+  const [watched, setWatchedMovies] = useLocalStorageState([], "watched");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const fetchMovieData = async () => {
-      try {
-        setIsLoading(true);
-        setErrorMessage("");
-        const res = await fetch(
-          `http://www.omdbapi.com/?S=${query}&apikey=${KEY}`,
-          { signal: controller.signal }
-        );
-        const data = await res.json();
-        if ("Response" in data && data.Response === "False") {
-          throw new Error("movie name is not correct");
-        }
-        setMovies(data.Search);
-        setErrorMessage("");
-      } catch (err: unknown) {
-        const errorInstance = err as { message: string; name: string };
-        const resError = errorInstance.message;
-        if (errorInstance.name !== "AbortError") {
-          setErrorMessage(resError);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    if (query.length < 3) {
-      setMovies([]);
-      setErrorMessage("");
-      return;
-    }
-    fetchMovieData();
-    return function () {
-      controller.abort();
-    };
-  }, [query]);
+  const { movies, isLoading, error } = useMovie(query, handleCloseMovie);
 
-  useEffect(() => {
-    localStorage.setItem("watched", JSON.stringify(watched));
-  }, [watched]);
-  const handleSelectMovie = (id: string) => {
+  function handleCloseMovie() {
+    setSelectedId(null);
+  }
+  function handleSelectMovie(id: string) {
     setSelectedId((selectdId) => (selectdId === id ? null : id));
-  };
-  const handleWatchedMovie = (movie: WatchMoviesProps) => {
+  }
+  function handleWatchedMovie(movie: WatchMoviesProps) {
     const movieHasExisted = watched.find(
       (item) => item.imbdId === movie.imbdId
     );
     if (movieHasExisted) {
       return;
     }
-    console.log("movie", movie);
     setWatchedMovies((watched) => [...watched, movie]);
-  };
+  }
 
-  const deleteMovie = (id: string) => {
+  function deleteMovie(id: string) {
     setWatchedMovies((watched) =>
       watched.filter((movie) => movie.imbdId !== id)
     );
-  };
-  const renderToggleBox = () => {
+  }
+  function renderToggleBox() {
     return (
       <>
         {!movies.length ? (
@@ -100,7 +57,7 @@ export default function App() {
         ) : null}
       </>
     );
-  };
+  }
   return (
     <>
       <Header>
